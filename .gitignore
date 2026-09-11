@@ -1,0 +1,130 @@
+# ========================================
+# Agent 24 - Research Collaboration Agent
+# ========================================
+
+
+# ---------- Python ----------
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Python packaging
+*.egg-info/
+.eggs/
+
+
+# ---------- Node / React / Vite ----------
+
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build output
+dist/
+build/
+dist-ssr/
+
+# Vite
+.vite/
+
+# Local environment files
+*.local
+
+
+# ---------- IDE / Editors ----------
+
+.vscode/
+!.vscode/extensions.json
+
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Swap files
+*.swp
+*.swo
+
+
+# ---------- OS ----------
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+
+# ---------- Logs ----------
+
+*.log
+logs/
+
+
+# ---------- Local databases ----------
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# ---------- Temporary files ----------
+
+*.tmp
+*.temp
+
+
+# ---------- AI / ML ----------
+
+# Uncomment these if you later download large model files
+# *.bin
+# *.pt
+# *.pth
+# *.safetensors
+
+
+# ---------- Local / Generated Data ----------
+
+# Uncomment if these folders are later created
+# data/raw/
+# data/processed/
+
+
+# ---------- Coverage ----------
+
+.coverage
+htmlcov/
+
+
+# ---------- Jupyter ----------
+
+.ipynb_checkpoints/
+
+
+# ---------- Secrets ----------
+
+*.pem
+*.key
+credentials.json
+service-account*.json
