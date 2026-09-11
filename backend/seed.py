@@ -3,6 +3,8 @@ from datetime import datetime
 from database.connection import SessionLocal
 from models.models import (
     Faculty,
+    Publication,
+    Project,
     Collaboration,
     ExternalResearcher,
     FundingCall,
@@ -12,6 +14,8 @@ from models.models import (
 
 from data.mock_data import (
     FACULTY,
+    PUBLICATIONS,
+    PROJECTS,
     COLLABORATIONS,
     EXTERNAL_RESEARCHERS,
     FUNDING_OPPORTUNITIES,
@@ -38,6 +42,8 @@ def seed_database():
         db.query(ExternalResearcher).delete()
         db.query(Collaboration).delete()
         db.query(Faculty).delete()
+        db.query(Project).delete()
+        db.query(Publication).delete()
 
         # ---------------------------------------------------------
         # FACULTY
@@ -55,6 +61,36 @@ def seed_database():
             )
 
             db.add(faculty)
+
+        # ---------------------------------------------------------
+        # PUBLICATIONS
+        # ---------------------------------------------------------
+        for item in PUBLICATIONS:
+            publication = Publication(
+                id=item["id"],
+                title=item["title"],
+                faculty_name=item["faculty_name"],
+                year=item["year"],
+                venue=item["venue"],
+                doi=item["doi"],
+            )
+
+            db.add(publication)
+
+        # ---------------------------------------------------------
+        # PROJECTS
+        # ---------------------------------------------------------
+        for item in PROJECTS:
+            project = Project(
+                id=item["id"],
+                title=item["title"],
+                faculty_name=item["faculty_name"],
+                description=item["description"],
+                research_area=item["research_area"],
+                status=item["status"],
+            )
+
+            db.add(project)
 
         # ---------------------------------------------------------
         # COLLABORATIONS
@@ -163,6 +199,8 @@ def seed_database():
         print(f"Funding calls: {len(FUNDING_OPPORTUNITIES)}")
         print(f"MoUs: {len(MOUS)}")
         print(f"Tracking records: {len(TRACKING_RECORDS)}")
+        print(f"Publications: {len(PUBLICATIONS)}")
+        print(f"Projects: {len(PROJECTS)}")
 
     except Exception as error:
         db.rollback()

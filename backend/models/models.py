@@ -21,6 +21,7 @@ class Publication(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(500), nullable=False)
+    faculty_name = Column(String(200), nullable=False)
     year = Column(Integer)
     venue = Column(String(300))
     doi = Column(String(200))
@@ -31,6 +32,7 @@ class Project(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(500), nullable=False)
+    faculty_name = Column(String(200), nullable=False)
     description = Column(Text)
     research_area = Column(String(200))
     status = Column(String(100))
