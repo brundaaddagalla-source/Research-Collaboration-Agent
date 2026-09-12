@@ -116,6 +116,48 @@ def prepare_evidence(faculty_evidence):
     return evidence_by_faculty_id
 
 
+# def prepare_funding_calls():
+#     """
+#     Load funding opportunities from the database.
+#     """
+
+#     db = SessionLocal()
+
+#     try:
+#         funding_calls = (
+#             db.query(FundingCall)
+#             .all()
+#         )
+
+#         return [
+#             {
+#                 "id": call.id,
+#                 "title": call.title,
+#                 "organization":
+#                     getattr(
+#                         call,
+#                         "organization",
+#                         None,
+#                     ),
+#                 "deadline":
+#                     getattr(
+#                         call,
+#                         "deadline",
+#                         None,
+#                     ),
+#                 "research_areas":
+#                     getattr(
+#                         call,
+#                         "research_areas",
+#                         [],
+#                     ),
+#             }
+#             for call in funding_calls
+#         ]
+
+#     finally:
+#         db.close()
+
 def prepare_funding_calls():
     """
     Load funding opportunities from the database.
@@ -132,23 +174,35 @@ def prepare_funding_calls():
         return [
             {
                 "id": call.id,
-                "title": call.title,
+
+                "name":
+                    call.name,
+
                 "organization":
                     getattr(
                         call,
                         "organization",
                         None,
                     ),
+
                 "deadline":
                     getattr(
                         call,
                         "deadline",
                         None,
                     ),
-                "research_areas":
+
+                "fields":
                     getattr(
                         call,
-                        "research_areas",
+                        "fields",
+                        [],
+                    ),
+
+                "keywords":
+                    getattr(
+                        call,
+                        "keywords",
                         [],
                     ),
             }
@@ -158,6 +212,52 @@ def prepare_funding_calls():
     finally:
         db.close()
 
+
+# def prepare_mous():
+#     """
+#     Load institutional MoUs.
+
+#     Mainly useful for external collaboration.
+#     """
+
+#     db = SessionLocal()
+
+#     try:
+#         mous = (
+#             db.query(MoU)
+#             .all()
+#         )
+
+#         return [
+#             {
+#                 "id": mou.id,
+
+#                 "partner_institution":
+#                     getattr(
+#                         mou,
+#                         "partner_institution",
+#                         None,
+#                     ),
+
+#                 "country":
+#                     getattr(
+#                         mou,
+#                         "country",
+#                         None,
+#                     ),
+
+#                 "status":
+#                     getattr(
+#                         mou,
+#                         "status",
+#                         None,
+#                     ),
+#             }
+#             for mou in mous
+#         ]
+
+#     finally:
+#         db.close()
 
 def prepare_mous():
     """
@@ -178,10 +278,10 @@ def prepare_mous():
             {
                 "id": mou.id,
 
-                "partner_institution":
+                "institution":
                     getattr(
                         mou,
-                        "partner_institution",
+                        "institution",
                         None,
                     ),
 
@@ -204,7 +304,6 @@ def prepare_mous():
 
     finally:
         db.close()
-
 
 def discover_internal_collaborations(
     faculty_name,

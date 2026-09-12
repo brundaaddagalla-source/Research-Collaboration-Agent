@@ -22,7 +22,10 @@ export const getDashboard = () => request("/api/dashboard");
 export const getFaculty = () => request("/api/faculty");
 export const getExpertise = () => request("/api/expertise");
 export const getCollaborations = () => request("/api/collaborations");
-export const getOpportunities = () => request("/api/opportunities");
+export const getOpportunities = (facultyName, topK = 5) =>
+  request(
+    `/api/opportunities?faculty_name=${encodeURIComponent(facultyName)}&top_k=${topK}`
+  );
 export const getExternalResearchers = () => request("/api/external-researchers");
 export const getFunding = () => request("/api/funding");
 export const getMous = () => request("/api/mous");

@@ -57,6 +57,11 @@ class ExternalResearcher(Base):
     name = Column(String(200), nullable=False)
     institution = Column(String(300))
     country = Column(String(100))
+
+    research_interests = Column(JSON)
+    skills = Column(JSON)
+
+    # Keep these for Agent 24 scoring
     research_area = Column(String(200))
     research_fit = Column(Integer)
     network_reachability = Column(String(50))
@@ -67,13 +72,21 @@ class FundingCall(Base):
     __tablename__ = "funding_calls"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(500), nullable=False)
+
+    name = Column(String(500), nullable=False)
     organization = Column(String(300))
+    amount = Column(Integer)
     deadline = Column(Date)
-    research_areas = Column(JSON)
+
+    fields = Column(JSON)
+    eligibility = Column(JSON)
+    research_stage = Column(JSON)
+    keywords = Column(JSON)
+
     consortium_requirement = Column(Boolean, default=False)
     international_partner_required = Column(Boolean, default=False)
     industry_partner_required = Column(Boolean, default=False)
+
     matching_faculty = Column(JSON)
 
 
@@ -84,10 +97,13 @@ class MoU(Base):
     institution = Column(String(300), nullable=False)
     country = Column(String(100))
     research_area = Column(String(200))
+
     signed_date = Column(Date)
     last_activity = Column(Date)
+
     joint_publications = Column(Integer, default=0)
     joint_projects = Column(Integer, default=0)
+
     status = Column(String(100))
 
 
@@ -95,8 +111,13 @@ class TrackingRecord(Base):
     __tablename__ = "tracking_records"
 
     id = Column(Integer, primary_key=True, index=True)
+
     faculty_a = Column(String(200), nullable=False)
-    faculty_b = Column(String(200), nullable=False)
+    faculty_b = Column(String(200))
+
+    external_researcher_id = Column(Integer)
+    external_institution = Column(String(300))
+
     topic = Column(String(500))
     current_stage = Column(String(100))
     history = Column(JSON)

@@ -19,6 +19,7 @@ from routes import (
     funding,
     mous,
     tracking,
+    partnership,
 )
 from database.connection import engine, Base
 from models import models
@@ -53,6 +54,7 @@ app.include_router(researchers.router, tags=["External Researchers"])
 app.include_router(funding.router, tags=["Funding & Consortiums"])
 app.include_router(mous.router, tags=["MoU Intelligence"])
 app.include_router(tracking.router, tags=["Collaboration Tracking"])
+app.include_router(partnership.router, tags=["Partnership Brief"])
 
 
 @app.get("/")

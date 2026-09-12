@@ -38,6 +38,7 @@ import requests
 from dotenv import load_dotenv
 
 from services.embedding_service import get_embedding
+from algorithms.collaboration_scoring import calculate_collaboration_score
 
 load_dotenv()
 
@@ -731,26 +732,84 @@ def calculate_evidence_strength(
 # NETWORK LAYER
 # ======================================================================
 
+# def build_collaboration_graph(
+#     collaborations,
+# ):
+#     """
+#     Build an undirected collaboration graph.
+
+#     Current database stores faculty names:
+#         faculty_a
+#         faculty_b
+
+#     The matching engine internally uses faculty IDs,
+#     so the names are converted using the supplied faculty data.
+#     """
+
+#     graph = {}
+
+#     for collaboration in collaborations:
+
+#         faculty_a = collaboration["faculty_a_id"]
+#         faculty_b = collaboration["faculty_b_id"]
+
+#         graph.setdefault(
+#             faculty_a,
+#             set(),
+#         ).add(faculty_b)
+
+#         graph.setdefault(
+#             faculty_b,
+#             set(),
+#         ).add(faculty_a)
+
+#     return graph
+
 def build_collaboration_graph(
     collaborations,
 ):
     """
     Build an undirected collaboration graph.
 
-    Current database stores faculty names:
-        faculty_a
-        faculty_b
+    Supports both:
 
-    The matching engine internally uses faculty IDs,
-    so the names are converted using the supplied faculty data.
+        faculty_a_id / faculty_b_id
+
+    and the current database fields:
+
+        faculty_a / faculty_b
     """
 
     graph = {}
 
     for collaboration in collaborations:
 
-        faculty_a = collaboration["faculty_a_id"]
-        faculty_b = collaboration["faculty_b_id"]
+        faculty_a = (
+            collaboration.get(
+                "faculty_a_id"
+            )
+            if collaboration.get(
+                "faculty_a_id"
+            ) is not None
+            else collaboration.get(
+                "faculty_a"
+            )
+        )
+
+        faculty_b = (
+            collaboration.get(
+                "faculty_b_id"
+            )
+            if collaboration.get(
+                "faculty_b_id"
+            ) is not None
+            else collaboration.get(
+                "faculty_b"
+            )
+        )
+
+        if faculty_a is None or faculty_b is None:
+            continue
 
         graph.setdefault(
             faculty_a,
@@ -1110,79 +1169,261 @@ def calculate_complementarity(
 # RESEARCH EVIDENCE RELEVANCE
 # ======================================================================
 
+# def calculate_evidence_relevance(
+#     evidence_a,
+#     evidence_b,
+# ):
+#     """
+#     Estimate how strongly the two faculty members have
+#     demonstrated relevant research activity.
+
+#     This combines:
+
+#         publication evidence
+#         project evidence
+#         active project evidence
+#     """
+
+#     evidence_a_strength = (
+#         evidence_a.get(
+#             "evidence_strength",
+#             0.0,
+#         )
+#     )
+
+#     evidence_b_strength = (
+#         evidence_b.get(
+#             "evidence_strength",
+#             0.0,
+#         )
+#     )
+
+#     average_strength = (
+#         evidence_a_strength
+#         +
+#         evidence_b_strength
+#     ) / 2
+
+#     active_project_bonus = 0.0
+
+#     if evidence_a.get(
+#         "active_projects"
+#     ):
+#         active_project_bonus += 0.10
+
+#     if evidence_b.get(
+#         "active_projects"
+#     ):
+#         active_project_bonus += 0.10
+
+#     return round(
+#         min(
+#             average_strength
+#             +
+#             active_project_bonus,
+#             1.0,
+#         ),
+#         4,
+#     )
+
 def calculate_evidence_relevance(
     evidence_a,
     evidence_b,
+    shared_topics=None,
 ):
     """
-    Estimate how strongly the two faculty members have
-    demonstrated relevant research activity.
+    Estimate how strongly the collaboration is supported
+    by demonstrated research activity.
 
-    This combines:
+    Evidence includes:
+        - publication activity
+        - project activity
+        - active projects
+        - overlap with the proposed research direction
 
-        publication evidence
-        project evidence
-        active project evidence
+    Missing evidence is not automatically treated as negative.
     """
 
-    evidence_a_strength = (
-        evidence_a.get(
-            "evidence_strength",
-            0.0,
-        )
+    shared_topics = set(shared_topics or [])
+
+    evidence_a_strength = evidence_a.get(
+        "evidence_strength",
+        0.0,
     )
 
-    evidence_b_strength = (
-        evidence_b.get(
-            "evidence_strength",
-            0.0,
-        )
+    evidence_b_strength = evidence_b.get(
+        "evidence_strength",
+        0.0,
     )
 
     average_strength = (
         evidence_a_strength
-        +
-        evidence_b_strength
+        + evidence_b_strength
     ) / 2
 
-    active_project_bonus = 0.0
+    activity_bonus = 0.0
 
-    if evidence_a.get(
-        "active_projects"
-    ):
-        active_project_bonus += 0.10
+    if evidence_a.get("publication_count", 0) > 0:
+        activity_bonus += 0.05
 
-    if evidence_b.get(
-        "active_projects"
-    ):
-        active_project_bonus += 0.10
+    if evidence_b.get("publication_count", 0) > 0:
+        activity_bonus += 0.05
 
-    return round(
-        min(
-            average_strength
-            +
-            active_project_bonus,
-            1.0,
-        ),
-        4,
+    if evidence_a.get("active_projects"):
+        activity_bonus += 0.05
+
+    if evidence_b.get("active_projects"):
+        activity_bonus += 0.05
+
+    combined_a = set(
+        evidence_a.get(
+            "combined_keywords",
+            set(),
+        )
     )
 
+    combined_b = set(
+        evidence_b.get(
+            "combined_keywords",
+            set(),
+        )
+    )
+
+    relevance_bonus = 0.0
+
+    if shared_topics:
+        evidence_overlap = (
+            combined_a
+            & combined_b
+            & shared_topics
+        )
+
+        if evidence_overlap:
+            relevance_bonus = min(
+                len(evidence_overlap) * 0.05,
+                0.15,
+            )
+
+    score = (
+        average_strength
+        + activity_bonus
+        + relevance_bonus
+    )
+
+    return round(
+        min(max(score, 0.0), 1.0),
+        4,
+    )
 
 # ======================================================================
 # FUNDING
 # ======================================================================
+
+# def find_relevant_funding(
+#     combined_areas,
+#     funding_calls,
+# ):
+#     """
+#     Find funding calls whose declared research areas
+#     overlap the combined research evidence.
+
+#     This is an initial deterministic matcher.
+
+#     Semantic funding matching can be added later.
+#     """
+
+#     combined_areas = {
+#         str(area).lower().strip()
+#         for area in combined_areas
+#         if str(area).strip()
+#     }
+
+#     matches = []
+
+#     for call in funding_calls:
+
+#         call_areas = {
+#             str(area).lower().strip()
+#             for area in (
+#                 call.get(
+#                     "research_areas"
+#                 )
+#                 or []
+#             )
+#             if str(area).strip()
+#         }
+
+#         overlap = (
+#             combined_areas
+#             &
+#             call_areas
+#         )
+
+#         if overlap:
+
+#             matches.append(
+#                 {
+#                     "id": call.get("id"),
+#                     "title": call.get("title"),
+#                     "organization": call.get(
+#                         "organization"
+#                     ),
+#                     "deadline": call.get(
+#                         "deadline"
+#                     ),
+#                     "matched_areas": sorted(
+#                         overlap
+#                     ),
+#                 }
+#             )
+
+#     return matches
+
+GENERIC_FUNDING_TERMS = {
+    "learning",
+    "deep",
+    "intelligence",
+    "machine",
+
+    "system",
+    "systems",
+
+    "application",
+    "applications",
+
+    "analysis",
+    "analyses",
+
+    "method",
+    "methods",
+
+    "research",
+
+    "technology",
+    "technologies",
+
+    "computer",
+    "computing",
+
+    "artificial",
+
+    "data",
+    "based",
+}
 
 def find_relevant_funding(
     combined_areas,
     funding_calls,
 ):
     """
-    Find funding calls whose declared research areas
-    overlap the combined research evidence.
+    Find funding calls relevant to the combined research
+    evidence of two faculty members.
 
-    This is an initial deterministic matcher.
+    Supports the current Agent 24 database schema:
 
-    Semantic funding matching can be added later.
+        FundingCall.name
+        FundingCall.fields
+        FundingCall.keywords
     """
 
     combined_areas = {
@@ -1194,30 +1435,43 @@ def find_relevant_funding(
     matches = []
 
     for call in funding_calls:
+        call_terms = set()
 
-        call_areas = {
-            str(area).lower().strip()
-            for area in (
-                call.get(
-                    "research_areas"
-                )
-                or []
+        fields = call.get("fields") or []
+        keywords = call.get("keywords") or []
+
+        if isinstance(fields, str):
+            fields = [fields]
+
+        if isinstance(keywords, str):
+            keywords = [keywords]
+
+        for field in fields:
+            call_terms.update(
+                _tokenize_text(field)
             )
-            if str(area).strip()
-        }
+
+        for keyword in keywords:
+            call_terms.update(
+                _tokenize_text(keyword)
+            )
 
         overlap = (
             combined_areas
-            &
-            call_areas
+            & call_terms
         )
 
-        if overlap:
+        meaningful_overlap = {
+            term
+            for term in overlap
+            if term not in GENERIC_FUNDING_TERMS
+        }
 
+        if meaningful_overlap:
             matches.append(
                 {
                     "id": call.get("id"),
-                    "title": call.get("title"),
+                    "title": call.get("name"),
                     "organization": call.get(
                         "organization"
                     ),
@@ -1225,7 +1479,7 @@ def find_relevant_funding(
                         "deadline"
                     ),
                     "matched_areas": sorted(
-                        overlap
+                        meaningful_overlap
                     ),
                 }
             )
@@ -1253,52 +1507,103 @@ def calculate_funding_score(
 # MOU
 # ======================================================================
 
+# def find_relevant_mou(
+#     countries_or_institutions,
+#     mous,
+# ):
+#     """
+#     Find MoUs matching supplied institutions/countries.
+
+#     Mainly useful for external collaboration candidates.
+#     """
+
+#     targets = {
+#         str(target).lower().strip()
+#         for target in countries_or_institutions
+#         if target
+#     }
+
+#     matches = []
+
+#     for mou in mous:
+
+#         institution = str(
+#             mou.get(
+#                 "partner_institution"
+#             )
+#             or ""
+#         ).lower()
+
+#         country = str(
+#             mou.get(
+#                 "country"
+#             )
+#             or ""
+#         ).lower()
+
+#         if (
+#             institution in targets
+#             or country in targets
+#         ):
+
+#             matches.append(
+#                 {
+#                     "id": mou.get("id"),
+#                     "partner_institution":
+#                         mou.get(
+#                             "partner_institution"
+#                         ),
+#                     "status":
+#                         mou.get("status"),
+#                 }
+#             )
+
+#     return matches
+
 def find_relevant_mou(
     countries_or_institutions,
     mous,
 ):
     """
-    Find MoUs matching supplied institutions/countries.
+    Find MoUs matching supplied institutions or countries.
 
-    Mainly useful for external collaboration candidates.
+    Supports the current Agent 24 database schema:
+
+        MoU.institution
+        MoU.country
+        MoU.status
     """
 
     targets = {
         str(target).lower().strip()
         for target in countries_or_institutions
-        if target
+        if str(target).strip()
     }
 
     matches = []
 
     for mou in mous:
-
         institution = str(
-            mou.get(
-                "partner_institution"
-            )
+            mou.get("institution")
             or ""
-        ).lower()
+        ).lower().strip()
 
         country = str(
-            mou.get(
-                "country"
-            )
+            mou.get("country")
             or ""
-        ).lower()
+        ).lower().strip()
 
         if (
             institution in targets
             or country in targets
         ):
-
             matches.append(
                 {
                     "id": mou.get("id"),
                     "partner_institution":
-                        mou.get(
-                            "partner_institution"
-                        ),
+                        mou.get("institution"),
+                    "country":
+                        mou.get("country"),
                     "status":
                         mou.get("status"),
                 }
@@ -1452,6 +1757,126 @@ Funding Relevance:
         return None
 
 
+# def generate_potential_topic(
+#     faculty_a,
+#     faculty_b,
+#     evidence_a,
+#     evidence_b,
+# ):
+#     """
+#     Generate a deterministic research topic from
+#     meaningful research areas and project evidence.
+
+#     This provides a fallback topic before the
+#     LLM explanation layer.
+#     """
+
+#     research_areas_a = [
+#         str(area).strip()
+#         for area in evidence_a.get(
+#             "research_areas",
+#             []
+#         )
+#         if str(area).strip()
+#     ]
+
+#     research_areas_b = [
+#         str(area).strip()
+#         for area in evidence_b.get(
+#             "research_areas",
+#             []
+#         )
+#         if str(area).strip()
+#     ]
+
+#     project_a = (
+#         evidence_a.get(
+#             "active_projects",
+#             []
+#         )
+#     )
+
+#     project_b = (
+#         evidence_b.get(
+#             "active_projects",
+#             []
+#         )
+#     )
+
+#     # --------------------------------------------------
+#     # Shared research areas
+#     # --------------------------------------------------
+
+#     shared_areas = []
+
+#     for area_a in research_areas_a:
+#         for area_b in research_areas_b:
+
+#             if area_a.lower() == area_b.lower():
+
+#                 shared_areas.append(
+#                     area_a
+#                 )
+
+#     # --------------------------------------------------
+#     # Prefer different expertise
+#     # --------------------------------------------------
+
+#     unique_areas_a = [
+#         area
+#         for area in research_areas_a
+#         if area.lower()
+#         not in {
+#             item.lower()
+#             for item in research_areas_b
+#         }
+#     ]
+
+#     unique_areas_b = [
+#         area
+#         for area in research_areas_b
+#         if area.lower()
+#         not in {
+#             item.lower()
+#             for item in research_areas_a
+#         }
+#     ]
+
+#     if unique_areas_a and unique_areas_b:
+
+#         return (
+#             "Interdisciplinary research combining "
+#             f"{unique_areas_a[0]} and "
+#             f"{unique_areas_b[0]}"
+#         )
+
+#     # --------------------------------------------------
+#     # Shared research direction
+#     # --------------------------------------------------
+
+#     if shared_areas:
+
+#         return (
+#             f"Joint research in "
+#             f"{shared_areas[0]}"
+#         )
+
+#     # --------------------------------------------------
+#     # Project-based fallback
+#     # --------------------------------------------------
+
+#     if project_a and project_b:
+
+#         return (
+#             "Interdisciplinary research connecting "
+#             f"{project_a[0]} and "
+#             f"{project_b[0]}"
+#         )
+
+#     return (
+#         "Exploratory interdisciplinary research"
+#     )
+
 def generate_potential_topic(
     faculty_a,
     faculty_b,
@@ -1459,18 +1884,22 @@ def generate_potential_topic(
     evidence_b,
 ):
     """
-    Generate a deterministic research topic from
-    meaningful research areas and project evidence.
+    Generate a deterministic, evidence-based research topic.
 
-    This provides a fallback topic before the
-    LLM explanation layer.
+    Preference order:
+
+        1. Shared research area + unique expertise
+        2. Unique expertise from both researchers
+        3. Active project combination
+        4. Shared research area
+        5. Exploratory fallback
     """
 
     research_areas_a = [
         str(area).strip()
         for area in evidence_a.get(
             "research_areas",
-            []
+            [],
         )
         if str(area).strip()
     ]
@@ -1479,7 +1908,7 @@ def generate_potential_topic(
         str(area).strip()
         for area in evidence_b.get(
             "research_areas",
-            []
+            [],
         )
         if str(area).strip()
     ]
@@ -1487,85 +1916,90 @@ def generate_potential_topic(
     project_a = (
         evidence_a.get(
             "active_projects",
-            []
+            [],
         )
     )
 
     project_b = (
         evidence_b.get(
             "active_projects",
-            []
+            [],
         )
     )
 
-    # --------------------------------------------------
-    # Shared research areas
-    # --------------------------------------------------
+    areas_a_lower = {
+        area.lower()
+        for area in research_areas_a
+    }
 
-    shared_areas = []
+    areas_b_lower = {
+        area.lower()
+        for area in research_areas_b
+    }
 
-    for area_a in research_areas_a:
-        for area_b in research_areas_b:
-
-            if area_a.lower() == area_b.lower():
-
-                shared_areas.append(
-                    area_a
-                )
-
-    # --------------------------------------------------
-    # Prefer different expertise
-    # --------------------------------------------------
+    shared_areas = [
+        area
+        for area in research_areas_a
+        if area.lower() in areas_b_lower
+    ]
 
     unique_areas_a = [
         area
         for area in research_areas_a
-        if area.lower()
-        not in {
-            item.lower()
-            for item in research_areas_b
-        }
+        if area.lower() not in areas_b_lower
     ]
 
     unique_areas_b = [
         area
         for area in research_areas_b
-        if area.lower()
-        not in {
-            item.lower()
-            for item in research_areas_a
-        }
+        if area.lower() not in areas_a_lower
     ]
 
-    if unique_areas_a and unique_areas_b:
+    # --------------------------------------------------------------
+    # Shared foundation + complementary expertise
+    # --------------------------------------------------------------
 
+    if (
+        shared_areas
+        and unique_areas_a
+        and unique_areas_b
+    ):
+        return (
+            f"{shared_areas[0]} research combining "
+            f"{unique_areas_a[0]} and "
+            f"{unique_areas_b[0]}"
+        )
+
+    # --------------------------------------------------------------
+    # Complementary expertise without shared declared area
+    # --------------------------------------------------------------
+
+    if unique_areas_a and unique_areas_b:
         return (
             "Interdisciplinary research combining "
             f"{unique_areas_a[0]} and "
             f"{unique_areas_b[0]}"
         )
 
-    # --------------------------------------------------
-    # Shared research direction
-    # --------------------------------------------------
+    # --------------------------------------------------------------
+    # Project-based topic
+    # --------------------------------------------------------------
+
+    if project_a and project_b:
+        return (
+            "Joint research connecting "
+            f"{project_a[0]} and "
+            f"{project_b[0]}"
+        )
+
+    # --------------------------------------------------------------
+    # Shared research area
+    # --------------------------------------------------------------
 
     if shared_areas:
-
         return (
             f"Joint research in "
             f"{shared_areas[0]}"
-        )
-
-    # --------------------------------------------------
-    # Project-based fallback
-    # --------------------------------------------------
-
-    if project_a and project_b:
-
-        return (
-            "Interdisciplinary research connecting "
-            f"{project_a[0]} and "
-            f"{project_b[0]}"
         )
 
     return (
@@ -1577,48 +2011,50 @@ def generate_potential_topic(
 # FINAL COLLABORATION SCORE
 # ======================================================================
 
-def calculate_collaboration_score(
-    complementarity_score,
-    semantic_similarity,
-    evidence_relevance,
-    network_score,
-    funding_score,
-    mou_score,
-):
-    """
-    Calculate the overall collaboration opportunity score.
+# def calculate_collaboration_score(
+#     complementarity_score,
+#     semantic_similarity,
+#     evidence_relevance,
+#     network_score,
+#     funding_score,
+#     mou_score,
+# ):
+#     """
+#     Calculate the overall collaboration opportunity score.
 
-    Internal collaboration weighting:
+#     Internal collaboration weighting:
 
-        30% Complementarity
-        25% Research relevance
-        15% Project/evidence relevance
-        15% Network reachability
-        10% Funding compatibility
-         5% Institutional/MoU relationship
-    """
+#         30% Complementarity
+#         25% Research relevance
+#         15% Project/evidence relevance
+#         15% Network reachability
+#         10% Funding compatibility
+#          5% Institutional/MoU relationship
+#     """
 
-    score = (
-        0.30 * complementarity_score
-        +
-        0.25 * semantic_similarity
-        +
-        0.15 * evidence_relevance
-        +
-        0.15 * network_score
-        +
-        0.10 * funding_score
-        +
-        0.05 * mou_score
-    )
+#     score = (
+#         0.30 * complementarity_score
+#         +
+#         0.25 * semantic_similarity
+#         +
+#         0.15 * evidence_relevance
+#         +
+#         0.15 * network_score
+#         +
+#         0.10 * funding_score
+#         +
+#         0.05 * mou_score
+#     )
 
-    return round(
-        min(
-            max(score, 0.0),
-            1.0,
-        ),
-        4,
-    )
+#     return round(
+#         min(
+#             max(score, 0.0),
+#             1.0,
+#         ),
+#         4,
+#     )
+
+
 
 
 # ======================================================================
@@ -1706,6 +2142,7 @@ def generate_collaboration_hypothesis(
         calculate_evidence_relevance(
             evidence_a,
             evidence_b,
+            shared_topics=shared_topics,
         )
     )
 
@@ -1714,10 +2151,10 @@ def generate_collaboration_hypothesis(
             complementarity_score=
                 complementarity,
 
-            semantic_similarity=
+            research_relevance_score=
                 semantic_similarity,
 
-            evidence_relevance=
+            evidence_score=
                 evidence_relevance,
 
             network_score=
@@ -2080,7 +2517,7 @@ def find_complementary_faculty(
     mous=None,
     collaborations=None,
     top_k=5,
-    similarity_floor=0.55,
+    similarity_floor=0.45,
 ):
     """
     Find evidence-backed collaboration opportunities.
