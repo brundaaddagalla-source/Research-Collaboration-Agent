@@ -181,21 +181,13 @@ def get_funding_opportunities():
         return [
             {
                 "id": item.id,
-                "title": item.title,
+                "title": item.name,
                 "organization": item.organization,
-                "deadline": (
-                    item.deadline.isoformat()
-                    if item.deadline
-                    else None
-                ),
-                "research_areas": item.research_areas or [],
+                "deadline": item.deadline.isoformat() if item.deadline else None,
+                "research_areas": item.fields or [],
                 "consortium_requirement": item.consortium_requirement,
-                "international_partner_required": (
-                    item.international_partner_required
-                ),
-                "industry_partner_required": (
-                    item.industry_partner_required
-                ),
+                "international_partner_required": item.international_partner_required,
+                "industry_partner_required": item.industry_partner_required,
                 "matching_faculty": item.matching_faculty or [],
             }
             for item in funding

@@ -268,46 +268,106 @@ EXTERNAL_RESEARCHERS = [
         "name": "Dr. Sarah Thompson",
         "institution": "University of Melbourne",
         "country": "Australia",
+        "research_interests": [
+            "Climate Science",
+            "Climate Modeling",
+            "Hydrology",
+            "Disaster Risk Management",
+        ],
+        "skills": [
+            "Climate Modeling",
+            "Data Analysis",
+            "Hydrological Simulation",
+        ],
         "research_area": "Climate Modeling",
         "research_fit": 88,
         "network_reachability": "Medium",
         "overall_score": 85,
     },
+
     {
         "id": 2,
         "name": "Dr. Kenji Watanabe",
         "institution": "Tokyo Institute of Technology",
         "country": "Japan",
+        "research_interests": [
+            "Computer Vision",
+            "Artificial Intelligence",
+            "Deep Learning",
+            "Robotics",
+        ],
+        "skills": [
+            "Python",
+            "Deep Learning",
+            "Computer Vision",
+            "Image Processing",
+        ],
         "research_area": "Computer Vision",
         "research_fit": 92,
         "network_reachability": "High",
         "overall_score": 90,
     },
+
     {
         "id": 3,
         "name": "Dr. Lena Fischer",
         "institution": "ETH Zurich",
         "country": "Switzerland",
+        "research_interests": [
+            "Hydrology",
+            "Climate Science",
+            "Flood Modeling",
+            "Water Resources",
+        ],
+        "skills": [
+            "Hydrological Modeling",
+            "Climate Data Analysis",
+            "Flood Prediction",
+        ],
         "research_area": "Hydrology",
         "research_fit": 81,
         "network_reachability": "Low",
         "overall_score": 74,
     },
+
     {
         "id": 4,
         "name": "Dr. Michael Obi",
         "institution": "University of Cape Town",
         "country": "South Africa",
+        "research_interests": [
+            "Renewable Energy",
+            "Energy Systems",
+            "Sustainable Engineering",
+        ],
+        "skills": [
+            "Energy Optimization",
+            "Solar Energy",
+            "Energy Systems Modeling",
+        ],
         "research_area": "Renewable Energy",
         "research_fit": 79,
         "network_reachability": "Medium",
         "overall_score": 76,
     },
+
     {
         "id": 5,
         "name": "Dr. Wei Zhang",
         "institution": "National University of Singapore",
         "country": "Singapore",
+        "research_interests": [
+            "Bioinformatics",
+            "Genomics",
+            "Computational Biology",
+            "Machine Learning",
+        ],
+        "skills": [
+            "Python",
+            "Machine Learning",
+            "Genomic Data Analysis",
+            "Bioinformatics",
+        ],
         "research_area": "Bioinformatics",
         "research_fit": 86,
         "network_reachability": "High",
@@ -322,47 +382,167 @@ EXTERNAL_RESEARCHERS = [
 FUNDING_OPPORTUNITIES = [
     {
         "id": 1,
-        "title": "Indo-Australian Joint Research Grant on Climate Resilience",
+        "name": "Indo-Australian Joint Research Grant on Climate Resilience",
         "organization": "Department of Science & Technology (DST)",
+        "amount": 1000000,
         "deadline": "2026-11-15",
-        "research_areas": ["Climate Science", "Hydrology"],
+
+        "fields": [
+            "Climate Science",
+            "Hydrology",
+            "Disaster Risk Management",
+        ],
+
+        "eligibility": [
+            "Faculty",
+            "Research Scholars",
+        ],
+
+        "research_stage": [
+            "Research",
+            "Prototype",
+        ],
+
+        "keywords": [
+            "climate",
+            "hydrology",
+            "flood",
+            "disaster",
+            "climate resilience",
+        ],
+
         "consortium_requirement": True,
         "international_partner_required": True,
         "industry_partner_required": False,
-        "matching_faculty": ["Dr. Rahul Sharma", "Dr. Meera Krishnan"],
+
+        "matching_faculty": [
+            "Dr. Rahul Sharma",
+            "Dr. Meera Krishnan",
+        ],
     },
+
     {
         "id": 2,
-        "title": "AI for Earth Observation Challenge",
+        "name": "AI for Earth Observation Challenge",
         "organization": "Department of Biotechnology (DBT)",
+        "amount": 750000,
         "deadline": "2026-10-30",
-        "research_areas": ["Computer Vision", "Remote Sensing"],
+
+        "fields": [
+            "Computer Vision",
+            "Remote Sensing",
+            "Artificial Intelligence",
+        ],
+
+        "eligibility": [
+            "Faculty",
+            "Research Scholars",
+        ],
+
+        "research_stage": [
+            "Research",
+            "Prototype",
+        ],
+
+        "keywords": [
+            "computer vision",
+            "remote sensing",
+            "satellite",
+            "earth observation",
+            "AI",
+            "deep learning",
+        ],
+
         "consortium_requirement": False,
         "international_partner_required": False,
         "industry_partner_required": True,
-        "matching_faculty": ["Dr. Ananya Rao", "Dr. Priya Menon"],
+
+        "matching_faculty": [
+            "Dr. Ananya Rao",
+            "Dr. Priya Menon",
+        ],
     },
+
     {
         "id": 3,
-        "title": "Renewable Energy Innovation Fund",
+        "name": "Renewable Energy Innovation Fund",
         "organization": "Ministry of New and Renewable Energy (MNRE)",
+        "amount": 1200000,
         "deadline": "2026-12-05",
-        "research_areas": ["Renewable Energy"],
+
+        "fields": [
+            "Renewable Energy",
+            "Energy Systems",
+            "Sustainable Engineering",
+        ],
+
+        "eligibility": [
+            "Faculty",
+            "Research Scholars",
+        ],
+
+        "research_stage": [
+            "Research",
+            "Prototype",
+            "Deployment",
+        ],
+
+        "keywords": [
+            "renewable energy",
+            "solar energy",
+            "energy systems",
+            "energy optimization",
+            "sustainable",
+        ],
+
         "consortium_requirement": True,
         "international_partner_required": False,
         "industry_partner_required": True,
-        "matching_faculty": ["Dr. Suresh Iyer"],
+
+        "matching_faculty": [
+            "Dr. Suresh Iyer",
+        ],
     },
+
     {
         "id": 4,
-        "title": "Genomics for Public Health Consortium",
+        "name": "Genomics for Public Health Consortium",
         "organization": "Indian Council of Medical Research (ICMR)",
+        "amount": 1500000,
         "deadline": "2027-01-20",
-        "research_areas": ["Genomics", "Bioinformatics"],
+
+        "fields": [
+            "Genomics",
+            "Bioinformatics",
+            "Computational Biology",
+        ],
+
+        "eligibility": [
+            "Faculty",
+            "Research Scholars",
+        ],
+
+        "research_stage": [
+            "Research",
+            "Prototype",
+        ],
+
+        "keywords": [
+            "genomics",
+            "bioinformatics",
+            "genomic sequence",
+            "machine learning",
+            "disease",
+            "computational biology",
+        ],
+
         "consortium_requirement": True,
         "international_partner_required": True,
         "industry_partner_required": False,
-        "matching_faculty": ["Dr. Kavitha Reddy"],
+
+        "matching_faculty": [
+            "Dr. Kavitha Reddy",
+        ],
     },
 ]
 
@@ -382,6 +562,7 @@ MOUS = [
         "joint_projects": 2,
         "status": "Active",
     },
+
     {
         "id": 2,
         "institution": "ETH Zurich",
@@ -393,6 +574,7 @@ MOUS = [
         "joint_projects": 0,
         "status": "Underutilized",
     },
+
     {
         "id": 3,
         "institution": "University of Cape Town",
@@ -404,6 +586,7 @@ MOUS = [
         "joint_projects": 0,
         "status": "Dormant",
     },
+
     {
         "id": 4,
         "institution": "National University of Singapore",
@@ -415,6 +598,7 @@ MOUS = [
         "joint_projects": 3,
         "status": "Active",
     },
+
     {
         "id": 5,
         "institution": "University of Melbourne",
@@ -432,52 +616,305 @@ MOUS = [
 # COLLABORATION TRACKING PIPELINE
 # ---------------------------------------------------------------------------
 
-TRACKING_STAGES = ["Recommendation", "Introduction", "Meeting", "Proposal", "Funded Project", "Publication"]
+TRACKING_STAGES = [
+    "Recommendation",
+    "Introduction",
+    "Meeting",
+    "Proposal",
+    "Funded Project",
+    "Publication",
+]
+
 
 TRACKING_RECORDS = [
     {
         "id": 1,
         "faculty_a": "Dr. Ananya Rao",
         "faculty_b": "Dr. Rahul Sharma",
+
+        "external_researcher_id": None,
+        "external_institution": None,
+
         "topic": "AI-based GLOF monitoring and early warning",
         "current_stage": "Meeting",
-        "history": ["Recommendation", "Introduction", "Meeting"],
+        "history": [
+            "Recommendation",
+            "Introduction",
+            "Meeting",
+        ],
         "last_updated": "2026-09-02",
     },
+
     {
         "id": 2,
         "faculty_a": "Dr. Vikram Nair",
         "faculty_b": "Dr. Kavitha Reddy",
+
+        "external_researcher_id": None,
+        "external_institution": None,
+
         "topic": "AI-driven genomic sequence analysis",
         "current_stage": "Introduction",
-        "history": ["Recommendation", "Introduction"],
+        "history": [
+            "Recommendation",
+            "Introduction",
+        ],
         "last_updated": "2026-08-21",
     },
+
     {
         "id": 3,
         "faculty_a": "Dr. Priya Menon",
         "faculty_b": "Dr. Meera Krishnan",
+
+        "external_researcher_id": None,
+        "external_institution": None,
+
         "topic": "Satellite-based disaster risk mapping",
         "current_stage": "Proposal",
-        "history": ["Recommendation", "Introduction", "Meeting", "Proposal"],
+        "history": [
+            "Recommendation",
+            "Introduction",
+            "Meeting",
+            "Proposal",
+        ],
         "last_updated": "2026-08-30",
     },
+
     {
         "id": 4,
         "faculty_a": "Dr. Suresh Iyer",
         "faculty_b": "Dr. Arjun Desai",
+
+        "external_researcher_id": None,
+        "external_institution": None,
+
         "topic": "Robotics-assisted renewable energy maintenance",
         "current_stage": "Recommendation",
-        "history": ["Recommendation"],
+        "history": [
+            "Recommendation",
+        ],
         "last_updated": "2026-09-08",
     },
+
+    # External collaboration tracking example
     {
         "id": 5,
         "faculty_a": "Dr. Kavitha Reddy",
-        "faculty_b": "Dr. Wei Zhang",
+        "faculty_b": None,
+
+        "external_researcher_id": 5,
+        "external_institution": "National University of Singapore",
+
         "topic": "Cross-border bioinformatics pipeline development",
         "current_stage": "Funded Project",
-        "history": ["Recommendation", "Introduction", "Meeting", "Proposal", "Funded Project"],
+        "history": [
+            "Recommendation",
+            "Introduction",
+            "Meeting",
+            "Proposal",
+            "Funded Project",
+        ],
         "last_updated": "2026-07-15",
+    },
+]
+
+
+PUBLICATIONS = [
+    {
+        "id": 1,
+        "title": "Deep Learning for Automated Detection of Objects in Satellite Imagery",
+        "faculty_name": "Dr. Ananya Rao",
+        "year": 2025,
+        "venue": "International Conference on Computer Vision and Pattern Recognition",
+        "doi": None,
+    },
+    {
+        "id": 2,
+        "title": "Vision-Based Analysis of Disaster-Affected Regions Using Deep Neural Networks",
+        "faculty_name": "Dr. Ananya Rao",
+        "year": 2024,
+        "venue": "Journal of Intelligent Systems",
+        "doi": None,
+    },
+    {
+        "id": 3,
+        "title": "Hydrological Modeling for Climate-Resilient Flood Prediction",
+        "faculty_name": "Dr. Rahul Sharma",
+        "year": 2025,
+        "venue": "Journal of Hydrology and Climate Science",
+        "doi": None,
+    },
+    {
+        "id": 4,
+        "title": "Climate Variability and Extreme Flood Events in South Asia",
+        "faculty_name": "Dr. Rahul Sharma",
+        "year": 2024,
+        "venue": "Climate Risk Research",
+        "doi": None,
+    },
+    {
+        "id": 5,
+        "title": "Satellite-Based Remote Sensing for Disaster Mapping",
+        "faculty_name": "Dr. Priya Menon",
+        "year": 2025,
+        "venue": "Remote Sensing Applications",
+        "doi": None,
+    },
+    {
+        "id": 6,
+        "title": "Signal Processing Techniques for Environmental Monitoring",
+        "faculty_name": "Dr. Priya Menon",
+        "year": 2024,
+        "venue": "International Journal of Signal Processing",
+        "doi": None,
+    },
+    {
+        "id": 7,
+        "title": "Artificial Intelligence Methods for Natural Language Understanding",
+        "faculty_name": "Dr. Vikram Nair",
+        "year": 2025,
+        "venue": "AI and Language Technologies",
+        "doi": None,
+    },
+    {
+        "id": 8,
+        "title": "Deep Learning Approaches for Multilingual Text Analysis",
+        "faculty_name": "Dr. Vikram Nair",
+        "year": 2024,
+        "venue": "Computational Intelligence Journal",
+        "doi": None,
+    },
+    {
+        "id": 9,
+        "title": "Machine Learning for Genomic Sequence Analysis",
+        "faculty_name": "Dr. Kavitha Reddy",
+        "year": 2025,
+        "venue": "Bioinformatics and Computational Biology",
+        "doi": None,
+    },
+    {
+        "id": 10,
+        "title": "Computational Methods for Disease-Related Gene Identification",
+        "faculty_name": "Dr. Kavitha Reddy",
+        "year": 2024,
+        "venue": "Genomics Research",
+        "doi": None,
+    },
+    {
+        "id": 11,
+        "title": "Optimization of Hybrid Renewable Energy Systems",
+        "faculty_name": "Dr. Suresh Iyer",
+        "year": 2025,
+        "venue": "Renewable Energy Engineering",
+        "doi": None,
+    },
+    {
+        "id": 12,
+        "title": "Thermal Performance Analysis of Solar Energy Systems",
+        "faculty_name": "Dr. Suresh Iyer",
+        "year": 2024,
+        "venue": "Energy Systems Research",
+        "doi": None,
+    },
+    {
+        "id": 13,
+        "title": "Climate Change and Disaster Risk Assessment in Vulnerable Regions",
+        "faculty_name": "Dr. Meera Krishnan",
+        "year": 2025,
+        "venue": "Climate and Disaster Management",
+        "doi": None,
+    },
+    {
+        "id": 14,
+        "title": "Data-Driven Approaches for Community Disaster Preparedness",
+        "faculty_name": "Dr. Meera Krishnan",
+        "year": 2024,
+        "venue": "Disaster Risk Reduction Journal",
+        "doi": None,
+    },
+    {
+        "id": 15,
+        "title": "Computer Vision for Autonomous Robotic Navigation",
+        "faculty_name": "Dr. Arjun Desai",
+        "year": 2025,
+        "venue": "Robotics and Autonomous Systems",
+        "doi": None,
+    },
+    {
+        "id": 16,
+        "title": "Vision-Based Navigation for Robots in Unstructured Environments",
+        "faculty_name": "Dr. Arjun Desai",
+        "year": 2024,
+        "venue": "International Robotics Conference",
+        "doi": None,
+    },
+]
+
+
+PROJECTS = [
+    {
+        "id": 1,
+        "title": "AI-Based Disaster Image Analysis",
+        "faculty_name": "Dr. Ananya Rao",
+        "description": "Development of deep learning methods for detecting and analyzing disaster-affected regions from images.",
+        "research_area": "Computer Vision",
+        "status": "Active",
+    },
+    {
+        "id": 2,
+        "title": "Climate-Based Flood Forecasting System",
+        "faculty_name": "Dr. Rahul Sharma",
+        "description": "Development of hydrological models for predicting flood risks using climate and environmental data.",
+        "research_area": "Hydrology",
+        "status": "Active",
+    },
+    {
+        "id": 3,
+        "title": "Satellite Disaster Monitoring Platform",
+        "faculty_name": "Dr. Priya Menon",
+        "description": "Use of satellite remote sensing and signal processing for monitoring disaster-affected regions.",
+        "research_area": "Remote Sensing",
+        "status": "Active",
+    },
+    {
+        "id": 4,
+        "title": "AI Research and Language Intelligence Platform",
+        "faculty_name": "Dr. Vikram Nair",
+        "description": "Development of artificial intelligence and natural language processing techniques for intelligent information systems.",
+        "research_area": "Artificial Intelligence",
+        "status": "Active",
+    },
+    {
+        "id": 5,
+        "title": "AI-Assisted Genomic Disease Analysis",
+        "faculty_name": "Dr. Kavitha Reddy",
+        "description": "Application of machine learning and bioinformatics techniques to genomic data for disease analysis.",
+        "research_area": "Bioinformatics",
+        "status": "Active",
+    },
+    {
+        "id": 6,
+        "title": "Smart Renewable Energy Management",
+        "faculty_name": "Dr. Suresh Iyer",
+        "description": "Development of intelligent systems for improving the efficiency and management of renewable energy systems.",
+        "research_area": "Renewable Energy",
+        "status": "Active",
+    },
+    {
+        "id": 7,
+        "title": "Climate Disaster Risk Assessment",
+        "faculty_name": "Dr. Meera Krishnan",
+        "description": "Assessment of climate-related disaster risks using environmental and socioeconomic information.",
+        "research_area": "Disaster Risk Management",
+        "status": "Active",
+    },
+    {
+        "id": 8,
+        "title": "Autonomous Disaster Response Robotics",
+        "faculty_name": "Dr. Arjun Desai",
+        "description": "Development of computer-vision-enabled robots for navigation and assistance during disaster response operations.",
+        "research_area": "Robotics",
+        "status": "Active",
     },
 ]

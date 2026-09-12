@@ -1,5 +1,6 @@
 import { getExpertise } from "../services/api";
 import { useApiData } from "../services/useApiData";
+import { Network } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { LoadingView, ErrorView, EmptyView } from "../components/StateViews";
 
@@ -17,6 +18,7 @@ export default function ExpertiseMap() {
   return (
     <div>
       <PageHeader
+        icon={Network}
         title="Expertise Map"
         description="Research areas mapped by faculty count. In later phases this will be generated from faculty profiles and publication embeddings (Agent 19)."
       />

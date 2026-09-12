@@ -1,5 +1,6 @@
 import { getCollaborations } from "../services/api";
 import { useApiData } from "../services/useApiData";
+import { GitBranch } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { StatusBadge } from "../components/StatusBadge";
 import { LoadingView, ErrorView, EmptyView } from "../components/StateViews";
@@ -38,6 +39,7 @@ export default function CollaborationNetwork() {
   return (
     <div>
       <PageHeader
+        icon={GitBranch}
         title="Collaboration Network"
         description="A visual placeholder of existing faculty collaborations. Real network analysis (co-authorship graphs, centrality, gap detection) will be added in a later phase."
       />

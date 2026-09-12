@@ -1,8 +1,11 @@
 from datetime import datetime
 
 from database.connection import SessionLocal
+
 from models.models import (
     Faculty,
+    Publication,
+    Project,
     Collaboration,
     ExternalResearcher,
     FundingCall,
@@ -12,6 +15,8 @@ from models.models import (
 
 from data.mock_data import (
     FACULTY,
+    PUBLICATIONS,
+    PROJECTS,
     COLLABORATIONS,
     EXTERNAL_RESEARCHERS,
     FUNDING_OPPORTUNITIES,
@@ -28,6 +33,7 @@ def seed_database():
     db = SessionLocal()
 
     try:
+
         # ---------------------------------------------------------
         # Clear existing seeded data
         # ---------------------------------------------------------
@@ -38,6 +44,8 @@ def seed_database():
         db.query(ExternalResearcher).delete()
         db.query(Collaboration).delete()
         db.query(Faculty).delete()
+        db.query(Project).delete()
+        db.query(Publication).delete()
 
         # ---------------------------------------------------------
         # FACULTY
@@ -55,6 +63,38 @@ def seed_database():
             )
 
             db.add(faculty)
+
+        # ---------------------------------------------------------
+        # PUBLICATIONS
+        # ---------------------------------------------------------
+
+        for item in PUBLICATIONS:
+            publication = Publication(
+                id=item["id"],
+                title=item["title"],
+                faculty_name=item["faculty_name"],
+                year=item["year"],
+                venue=item["venue"],
+                doi=item["doi"],
+            )
+
+            db.add(publication)
+
+        # ---------------------------------------------------------
+        # PROJECTS
+        # ---------------------------------------------------------
+
+        for item in PROJECTS:
+            project = Project(
+                id=item["id"],
+                title=item["title"],
+                faculty_name=item["faculty_name"],
+                description=item["description"],
+                research_area=item["research_area"],
+                status=item["status"],
+            )
+
+            db.add(project)
 
         # ---------------------------------------------------------
         # COLLABORATIONS
@@ -83,6 +123,8 @@ def seed_database():
                 name=item["name"],
                 institution=item["institution"],
                 country=item["country"],
+                research_interests=item["research_interests"],
+                skills=item["skills"],
                 research_area=item["research_area"],
                 research_fit=item["research_fit"],
                 network_reachability=item["network_reachability"],
@@ -98,11 +140,17 @@ def seed_database():
         for item in FUNDING_OPPORTUNITIES:
             funding_call = FundingCall(
                 id=item["id"],
-                title=item["title"],
+                name=item["name"],
                 organization=item["organization"],
+                amount=item["amount"],
                 deadline=parse_date(item["deadline"]),
-                research_areas=item["research_areas"],
-                consortium_requirement=item["consortium_requirement"],
+                fields=item["fields"],
+                eligibility=item["eligibility"],
+                research_stage=item["research_stage"],
+                keywords=item["keywords"],
+                consortium_requirement=item[
+                    "consortium_requirement"
+                ],
                 international_partner_required=item[
                     "international_partner_required"
                 ],
@@ -142,10 +190,18 @@ def seed_database():
                 id=item["id"],
                 faculty_a=item["faculty_a"],
                 faculty_b=item["faculty_b"],
+                external_researcher_id=item[
+                    "external_researcher_id"
+                ],
+                external_institution=item[
+                    "external_institution"
+                ],
                 topic=item["topic"],
                 current_stage=item["current_stage"],
                 history=item["history"],
-                last_updated=parse_date(item["last_updated"]),
+                last_updated=parse_date(
+                    item["last_updated"]
+                ),
             )
 
             db.add(tracking_record)
@@ -163,9 +219,12 @@ def seed_database():
         print(f"Funding calls: {len(FUNDING_OPPORTUNITIES)}")
         print(f"MoUs: {len(MOUS)}")
         print(f"Tracking records: {len(TRACKING_RECORDS)}")
+        print(f"Publications: {len(PUBLICATIONS)}")
+        print(f"Projects: {len(PROJECTS)}")
 
     except Exception as error:
         db.rollback()
+
         print("Error while seeding database:")
         print(error)
 

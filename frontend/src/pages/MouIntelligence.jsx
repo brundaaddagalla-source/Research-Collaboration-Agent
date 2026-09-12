@@ -1,5 +1,6 @@
 import { getMous } from "../services/api";
 import { useApiData } from "../services/useApiData";
+import { FileSignature } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { StatusBadge } from "../components/StatusBadge";
 import { LoadingView, ErrorView, EmptyView } from "../components/StateViews";
@@ -16,6 +17,7 @@ export default function MouIntelligence() {
   return (
     <div>
       <PageHeader
+        icon={FileSignature}
         title="MoU Intelligence"
         description="Institutional partnerships and their usage status. Mock classifications - dormancy detection logic will be added in a later phase."
       />
