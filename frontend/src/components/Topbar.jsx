@@ -34,7 +34,7 @@ export function Topbar() {
       <div className="flex items-center gap-2 rounded-full border border-surface-line bg-white px-3 py-1.5 text-xs text-surface-muted shadow-sm">
         <CircleDot className="h-3.5 w-3.5 text-signal-active" />
 
-        <span>API connected · localhost:8000</span>
+        <span>API connected</span>
       </div>
     </header>
   );

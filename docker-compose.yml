@@ -1,0 +1,43 @@
+services:
+
+  freellmapi:
+    image: ghcr.io/tashfeenahmed/freellmapi:latest
+    container_name: freellmapi
+    environment:
+      PORT: 3001
+      ENCRYPTION_KEY: ${FREELLMAPI_ENCRYPTION_KEY}
+    ports:
+      - "3001:3001"
+    volumes:
+      - freellmapi-data:/app/server/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: research-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - research-documents:/app/storage/research_documents
+    depends_on:
+      - freellmapi
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: research-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  freellmapi-data:
+  research-documents:
