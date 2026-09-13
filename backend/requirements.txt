@@ -1,6 +1,19 @@
+#python 3.12 is compatible with all the requirements
+
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 pydantic==2.9.2
 SQLAlchemy
 psycopg[binary]
 python-dotenv
+openai
+
+# Faculty Login (JWT auth)
+PyJWT==2.9.0
+bcrypt==4.2.0
+
+# Faculty research document upload + text extraction
+python-multipart
+pypdf
+python-docx
+requests

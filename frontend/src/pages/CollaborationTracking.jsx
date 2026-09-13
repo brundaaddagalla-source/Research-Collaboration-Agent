@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, Activity } from "lucide-react";
 import { getTracking } from "../services/api";
 import { useApiData } from "../services/useApiData";
 import { PageHeader } from "../components/PageHeader";
@@ -17,6 +17,7 @@ export default function CollaborationTracking() {
   return (
     <div>
       <PageHeader
+        icon={Activity}
         title="Collaboration Tracking"
         description="Follows each suggested collaboration from first recommendation through to publication. Mock records - outcome tracking automation will be added later."
       />

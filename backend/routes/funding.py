@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-
+from adapters import source_adapter
 from algorithms.funding_agent.funding_agent import FundingAgent
 
 
@@ -16,6 +16,13 @@ class FundingRequest(BaseModel):
     research_stage: str
     researcher_type: str
 
+
+@router.get("")
+def get_funding():
+    """Return available funding opportunities."""
+    return {
+        "funding_opportunities": source_adapter.get_funding_opportunities()
+    }
 
 @router.post("")
 def find_funding(request: FundingRequest):
