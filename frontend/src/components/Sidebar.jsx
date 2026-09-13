@@ -1,90 +1,37 @@
-// import { NavLink } from "react-router-dom";
-// import {
-//   LayoutDashboard,
-//   Network,
-//   GitBranch,
-//   Lightbulb,
-//   Globe2,
-//   Landmark,
-//   FileSignature,
-//   Activity,
-//   Radar,
-// } from "lucide-react";
-
-// const NAV_ITEMS = [
-//   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-//   { to: "/expertise", label: "Expertise Map", icon: Network },
-//   { to: "/collaboration-network", label: "Collaboration Network", icon: GitBranch },
-//   { to: "/opportunities", label: "Internal Opportunities", icon: Lightbulb },
-//   { to: "/external-researchers", label: "External Researchers", icon: Globe2 },
-//   { to: "/funding", label: "Funding & Consortiums", icon: Landmark },
-//   { to: "/mous", label: "MoU Intelligence", icon: FileSignature },
-//   { to: "/tracking", label: "Collaboration Tracking", icon: Activity },
-// ];
-
-// export function Sidebar() {
-//   return (
-//     <aside className="fixed left-0 top-0 hidden h-screen w-64 flex-col bg-navy-950 text-white lg:flex">
-//       <div className="flex items-center gap-2.5 px-6 py-6">
-//         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-accent-blue to-navy-700">
-//           <Radar className="h-5 w-5 text-sky-100" />
-//         </div>
-//         <div>
-//           <p className="font-display text-sm font-bold leading-tight">Agent 24</p>
-//           <p className="text-[11px] leading-tight text-white/45">Research Collaboration</p>
-//         </div>
-//       </div>
-
-//       <nav className="mt-2 flex-1 space-y-1 overflow-y-auto px-3">
-//         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-//           <NavLink
-//             key={to}
-//             to={to}
-//             end={end}
-//             className={({ isActive }) =>
-//               `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
-//                 isActive
-//                   ? "bg-navy-700 text-white font-medium"
-//                   : "text-white/60 hover:bg-white/5 hover:text-white"
-//               }`
-//             }
-//           >
-//             <Icon className="h-4 w-4 shrink-0" />
-//             <span className="truncate">{label}</span>
-//           </NavLink>
-//         ))}
-//       </nav>
-
-      
-//     </aside>
-//   );
-// }
-
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  Network,
-  GitBranch,
-  Lightbulb,
-  Globe2,
-  Landmark,
-  FileSignature,
-  Activity,
+  Inbox,
+  Users,
+  UserCircle,
   Radar,
+  LogOut,
 } from "lucide-react";
 
+import { getStoredFaculty, clearStoredFaculty } from "../services/auth";
+
+// Faculty-facing navigation only. The previous admin-style sections
+// (Expertise Map, External Researchers, Funding, MoUs, Collaboration
+// Network) are hidden from this interface for now, per the new
+// faculty-facing scope - their pages and backend routes are untouched.
+// Faculty search now happens directly on the Dashboard, so there is no
+// separate "Faculty Search" nav item.
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/expertise", label: "Expertise Map", icon: Network },
-  { to: "/collaboration-network", label: "Collaboration Network", icon: GitBranch },
-  { to: "/opportunities", label: "Internal Opportunities", icon: Lightbulb },
-  { to: "/external-researchers", label: "External Researchers", icon: Globe2 },
-  { to: "/funding", label: "Funding & Consortiums", icon: Landmark },
-  { to: "/mous", label: "MoU Intelligence", icon: FileSignature },
-  { to: "/tracking", label: "Collaboration Tracking", icon: Activity },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/requests", label: "My Requests", icon: Inbox },
+  { to: "/collaborations", label: "My Collaborations", icon: Users },
+  { to: "/profile", label: "My Profile", icon: UserCircle },
 ];
 
 export function Sidebar() {
+  const navigate = useNavigate();
+  const faculty = getStoredFaculty();
+
+  function handleLogout() {
+    clearStoredFaculty();
+    navigate("/login", { replace: true });
+  }
+
   return (
     <aside className="fixed left-0 top-0 hidden h-screen w-64 flex-col border-r border-surface-line bg-white lg:flex">
       {/* Brand */}
@@ -124,19 +71,23 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Bottom status */}
+      {/* Logged-in faculty + logout */}
       <div className="border-t border-surface-line p-4">
         <div className="rounded-xl border border-surface-line bg-sky-50 p-3">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-signal-active" />
-            <span className="text-xs font-medium text-navy-800">
-              Agent Online
-            </span>
-          </div>
-
-          <p className="mt-1 text-[11px] text-surface-muted">
-            Research collaboration system
+          <p className="text-[11px] font-medium text-surface-muted">
+            Logged in as
           </p>
+          <p className="truncate text-sm font-semibold text-navy-800">
+            {faculty?.name || "Faculty"}
+          </p>
+
+          <button
+            onClick={handleLogout}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-surface-line bg-white px-3 py-2 text-xs font-medium text-surface-muted transition hover:border-signal-dormant/30 hover:text-signal-dormant"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Logout
+          </button>
         </div>
       </div>
     </aside>
