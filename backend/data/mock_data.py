@@ -7,29 +7,7 @@ connection. Real logic (expertise mapping, network analysis, scoring, etc.)
 will replace this in Phase 2+.
 """
 
-# ---------------------------------------------------------------------------
-# DASHBOARD SUMMARY
-# ---------------------------------------------------------------------------
 
-DASHBOARD_SUMMARY = {
-    "faculty_count": 124,
-    "research_areas": 38,
-    "existing_collaborations": 86,
-    "potential_collaborations": 24,
-    "external_candidates": 41,
-    "funding_matches": 12,
-    "dormant_mous": 5,
-}
-
-# Simple mock time-series for a "collaboration activity" chart on the dashboard
-COLLABORATION_ACTIVITY = [
-    {"month": "Apr", "new_collaborations": 3, "introductions": 5},
-    {"month": "May", "new_collaborations": 5, "introductions": 7},
-    {"month": "Jun", "new_collaborations": 4, "introductions": 6},
-    {"month": "Jul", "new_collaborations": 7, "introductions": 9},
-    {"month": "Aug", "new_collaborations": 6, "introductions": 8},
-    {"month": "Sep", "new_collaborations": 9, "introductions": 11},
-]
 
 # ---------------------------------------------------------------------------
 # FACULTY
@@ -37,74 +15,106 @@ COLLABORATION_ACTIVITY = [
 
 FACULTY = [
     {
-        "id": 1,
+        "id": 10243,
         "name": "Dr. Ananya Rao",
+        "email": "brunda1705@gmail.com",
         "department": "Computer Science & Engineering",
         "designation": "Associate Professor",
-        "research_areas": ["Computer Vision", "Deep Learning"],
+        "research_areas": [
+            "Computer Vision",
+            "Deep Learning",
+        ],
         "publications_count": 42,
         "collaboration_count": 6,
     },
     {
-        "id": 2,
+        "id": 22345,
         "name": "Dr. Rahul Sharma",
+        "email": "brundaaddagalla@gmail.com",
         "department": "Civil Engineering",
         "designation": "Professor",
-        "research_areas": ["Hydrology", "Climate Science"],
+        "research_areas": [
+            "Hydrology",
+            "Climate Science",
+        ],
         "publications_count": 58,
         "collaboration_count": 4,
     },
     {
-        "id": 3,
+        "id": 31452,
         "name": "Dr. Priya Menon",
+        "email": "addagallabrunda@gmail.com",
         "department": "Electronics & Communication Engineering",
         "designation": "Assistant Professor",
-        "research_areas": ["Remote Sensing", "Signal Processing"],
+        "research_areas": [
+            "Remote Sensing",
+            "Signal Processing",
+        ],
         "publications_count": 27,
         "collaboration_count": 3,
     },
     {
-        "id": 4,
+        "id": 42561,
         "name": "Dr. Vikram Nair",
+        "email": "vu.241fa4606@gmail.com",
         "department": "Computer Science & Engineering",
         "designation": "Professor",
-        "research_areas": ["Artificial Intelligence", "Natural Language Processing"],
+        "research_areas": [
+            "Artificial Intelligence",
+            "Natural Language Processing",
+        ],
         "publications_count": 71,
         "collaboration_count": 9,
     },
     {
-        "id": 5,
+        "id": 53672,
         "name": "Dr. Kavitha Reddy",
+        "email": "vu.241fa04610@gmail.com",
         "department": "Biotechnology",
         "designation": "Associate Professor",
-        "research_areas": ["Genomics", "Bioinformatics"],
+        "research_areas": [
+            "Genomics",
+            "Bioinformatics",
+        ],
         "publications_count": 35,
         "collaboration_count": 5,
     },
     {
-        "id": 6,
+        "id": 64783,
         "name": "Dr. Suresh Iyer",
+        "email": "mandurigiridharkrishna@gmail.com",
         "department": "Mechanical Engineering",
         "designation": "Professor",
-        "research_areas": ["Renewable Energy", "Thermal Systems"],
+        "research_areas": [
+            "Renewable Energy",
+            "Thermal Systems",
+        ],
         "publications_count": 49,
         "collaboration_count": 7,
     },
     {
-        "id": 7,
+        "id": 75894,
         "name": "Dr. Meera Krishnan",
+        "email": "giridharkrishna1017@gmail.com",
         "department": "Civil Engineering",
         "designation": "Assistant Professor",
-        "research_areas": ["Climate Science", "Disaster Risk Management"],
+        "research_areas": [
+            "Climate Science",
+            "Disaster Risk Management",
+        ],
         "publications_count": 19,
         "collaboration_count": 2,
     },
     {
-        "id": 8,
+        "id": 86915,
         "name": "Dr. Arjun Desai",
+        "email": "krishnacontact0708@gmail.com",
         "department": "Computer Science & Engineering",
         "designation": "Assistant Professor",
-        "research_areas": ["Robotics", "Computer Vision"],
+        "research_areas": [
+            "Robotics",
+            "Computer Vision",
+        ],
         "publications_count": 22,
         "collaboration_count": 3,
     },
@@ -266,6 +276,7 @@ EXTERNAL_RESEARCHERS = [
     {
         "id": 1,
         "name": "Dr. Sarah Thompson",
+        "email": "brunda1705@gmail.com",
         "institution": "University of Melbourne",
         "country": "Australia",
         "research_interests": [
@@ -288,6 +299,7 @@ EXTERNAL_RESEARCHERS = [
     {
         "id": 2,
         "name": "Dr. Kenji Watanabe",
+        "email": "brunda1705@gmail.com",
         "institution": "Tokyo Institute of Technology",
         "country": "Japan",
         "research_interests": [
@@ -311,6 +323,7 @@ EXTERNAL_RESEARCHERS = [
     {
         "id": 3,
         "name": "Dr. Lena Fischer",
+        "email": "brunda1705@gmail.com",
         "institution": "ETH Zurich",
         "country": "Switzerland",
         "research_interests": [
@@ -333,6 +346,7 @@ EXTERNAL_RESEARCHERS = [
     {
         "id": 4,
         "name": "Dr. Michael Obi",
+        "email": "brunda1705@gmail.com",
         "institution": "University of Cape Town",
         "country": "South Africa",
         "research_interests": [
@@ -354,6 +368,7 @@ EXTERNAL_RESEARCHERS = [
     {
         "id": 5,
         "name": "Dr. Wei Zhang",
+        "email": "brunda1705@gmail.com",
         "institution": "National University of Singapore",
         "country": "Singapore",
         "research_interests": [

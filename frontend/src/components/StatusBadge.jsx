@@ -36,6 +36,8 @@ const STYLE_MAP = {
   Strong: "bg-soft-green text-signal-active",
   Moderate: "bg-soft-orange text-signal-underutilized",
   Weak: "bg-signal-dormant/10 text-signal-dormant",
+
+  Accepted: "bg-soft-green text-signal-active",
 };
 
 export function StatusBadge({ status }) {
@@ -50,4 +52,3 @@ export function StatusBadge({ status }) {
     </span>
   );
 }
-

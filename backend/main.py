@@ -20,6 +20,8 @@ from routes import (
     mous,
     tracking,
     partnership,
+    auth,
+    collaboration_requests,
 )
 from database.connection import engine, Base
 from models import models
@@ -55,6 +57,8 @@ app.include_router(funding.router, tags=["Funding & Consortiums"])
 app.include_router(mous.router, tags=["MoU Intelligence"])
 app.include_router(tracking.router, tags=["Collaboration Tracking"])
 app.include_router(partnership.router, tags=["Partnership Brief"])
+app.include_router(auth.router, tags=["Faculty Auth"])
+app.include_router(collaboration_requests.router, tags=["Collaboration Requests"])
 
 
 @app.get("/")
