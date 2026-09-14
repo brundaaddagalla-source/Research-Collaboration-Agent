@@ -29,7 +29,7 @@ function App() {
         {/* Public - reached by clicking Accept/Reject/Approve/Reject in an
             email. No login required: the one-time token itself is the
             authorization (see backend routes/collaboration_requests.py). */}
-        <Route path="/collaboration-response/:token" element={<CollaborationResponse />} />
+        <Route path="/login/collaboration-response/:token" element={<CollaborationResponse />} />
 
         <Route
           element={
