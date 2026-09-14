@@ -7,3 +7,5 @@ venv
 .env
 .git
 storage/research_documents
+credentials.json
+token.json
