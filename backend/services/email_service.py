@@ -1,81 +1,305 @@
 """
-Direct SMTP email service for Agent 24 v2.
+Direct Gmail API email service for Agent 24 v2.
 
-No n8n, no external workflow automation - the FastAPI backend sends
-email itself, using Python's built-in smtplib. Configured entirely
-through environment variables (see .env.example):
+The FastAPI backend sends email directly through the Gmail API
+using OAuth 2.0 credentials.
 
-    SMTP_HOST
-    SMTP_PORT
-    SMTP_USERNAME
-    SMTP_PASSWORD       (use a Gmail "app password" if using Gmail SMTP)
-    SMTP_FROM_EMAIL
-    AUTHORITY_EMAIL
+Sender:
+    agent24.notification@gmail.com
 
-If SMTP is not configured (e.g. local dev without credentials), emails
-are logged to the console instead of raising - so the rest of the
-collaboration-request flow can still be exercised and tested without
-a real mailbox. This is surfaced back to the caller via the returned
-dict's `sent` flag so routes can decide whether to warn the user.
+Required environment variables:
+
+    GMAIL_SENDER_EMAIL
+
+    GMAIL_CREDENTIALS_JSON
+        Optional when credentials.json exists locally.
+        For deployment, store the OAuth client JSON as an environment variable.
+
+    GMAIL_TOKEN_JSON
+        OAuth token JSON created after the first authorization.
+
+For local development:
+    - credentials.json can be placed in the backend directory.
+    - On first run, the browser OAuth flow will create token.json.
+    - token.json can then be converted to GMAIL_TOKEN_JSON for deployment.
+
+If Gmail is not configured, emails are logged to the console instead
+of raising, so the collaboration-request flow can still be exercised.
 """
 
 import os
-import smtplib
-import ssl
+import json
+import base64
 from email.message import EmailMessage
 from typing import Optional
 
-SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USERNAME = os.getenv("SMTP_USERNAME")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", SMTP_USERNAME)
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+
+# Only request permission to send email.
+# This is narrower than full Gmail access.
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+
+GMAIL_SENDER_EMAIL = os.getenv(
+    "GMAIL_SENDER_EMAIL",
+    "agent24.notification@gmail.com",
+)
+
+GMAIL_CREDENTIALS_JSON = os.getenv("GMAIL_CREDENTIALS_JSON")
+GMAIL_TOKEN_JSON = os.getenv("GMAIL_TOKEN_JSON")
 
 AUTHORITY_EMAIL = os.getenv("AUTHORITY_EMAIL")
 
+# Local development files.
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CREDENTIALS_FILE = os.path.join(BASE_DIR, "credentials.json")
+TOKEN_FILE = os.path.join(BASE_DIR, "token.json")
 
-def _is_configured() -> bool:
-    return bool(SMTP_HOST and SMTP_USERNAME and SMTP_PASSWORD and SMTP_FROM_EMAIL)
 
-
-def send_email(to_email: str, subject: str, html_body: str, text_body: Optional[str] = None) -> dict:
+def _load_credentials() -> Optional[Credentials]:
     """
-    Send an email directly via SMTP. Returns {"sent": bool, "error": str|None}.
+    Load Gmail OAuth credentials.
 
-    Never raises on a missing SMTP configuration or a delivery failure -
-    the collaboration-request workflow (request/accept/reject/approve)
-    must still complete and be reflected in the database even if email
-    delivery is unavailable in a given environment; the caller decides
-    whether/how to surface that to the user.
+    Priority:
+    1. GMAIL_TOKEN_JSON environment variable
+    2. Local token.json
+    3. Interactive OAuth flow using credentials.json
+       (local development only)
     """
-    if not to_email:
-        return {"sent": False, "error": "No recipient email address."}
 
-    if not _is_configured():
-        print(
-            "[email_service] SMTP is not configured (SMTP_HOST/SMTP_USERNAME/"
-            "SMTP_PASSWORD/SMTP_FROM_EMAIL) - logging email instead of sending.\n"
-            f"To: {to_email}\nSubject: {subject}\n{'-' * 40}\n{text_body or html_body}\n{'-' * 40}"
-        )
-        return {"sent": False, "error": "SMTP is not configured."}
+    creds = None
 
-    message = EmailMessage()
-    message["Subject"] = subject
-    message["From"] = SMTP_FROM_EMAIL
-    message["To"] = to_email
-    message.set_content(text_body or "Please view this email in an HTML-capable client.")
-    message.add_alternative(html_body, subtype="html")
+    # ---------------------------------------------------------
+    # 1. Deployment: token supplied through environment variable
+    # ---------------------------------------------------------
+    if GMAIL_TOKEN_JSON:
+        try:
+            token_data = json.loads(GMAIL_TOKEN_JSON)
+
+            creds = Credentials.from_authorized_user_info(
+                token_data,
+                SCOPES,
+            )
+        except Exception as exc:
+            print(
+                f"[email_service] Failed to load GMAIL_TOKEN_JSON: {exc}"
+            )
+            return None
+
+    # ---------------------------------------------------------
+    # 2. Local development: token.json
+    # ---------------------------------------------------------
+    elif os.path.exists(TOKEN_FILE):
+        try:
+            creds = Credentials.from_authorized_user_file(
+                TOKEN_FILE,
+                SCOPES,
+            )
+        except Exception as exc:
+            print(
+                f"[email_service] Failed to load token.json: {exc}"
+            )
+            return None
+
+    # ---------------------------------------------------------
+    # Refresh an expired access token
+    # ---------------------------------------------------------
+    if creds and creds.expired and creds.refresh_token:
+        try:
+            creds.refresh(Request())
+
+            # Save refreshed credentials locally.
+            if not GMAIL_TOKEN_JSON:
+                with open(TOKEN_FILE, "w", encoding="utf-8") as token:
+                    token.write(creds.to_json())
+
+        except Exception as exc:
+            print(
+                f"[email_service] Failed to refresh Gmail credentials: {exc}"
+            )
+            return None
+
+    # ---------------------------------------------------------
+    # 3. First-time local OAuth authorization
+    # ---------------------------------------------------------
+    if not creds or not creds.valid:
+
+        if GMAIL_CREDENTIALS_JSON:
+            try:
+                credentials_data = json.loads(GMAIL_CREDENTIALS_JSON)
+
+                flow = InstalledAppFlow.from_client_config(
+                    credentials_data,
+                    SCOPES,
+                )
+
+            except Exception as exc:
+                print(
+                    "[email_service] Failed to load "
+                    f"GMAIL_CREDENTIALS_JSON: {exc}"
+                )
+                return None
+
+        elif os.path.exists(CREDENTIALS_FILE):
+            try:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    CREDENTIALS_FILE,
+                    SCOPES,
+                )
+
+            except Exception as exc:
+                print(
+                    f"[email_service] Failed to load credentials.json: {exc}"
+                )
+                return None
+
+        else:
+            print(
+                "[email_service] Gmail OAuth credentials are not configured. "
+                "Expected credentials.json or GMAIL_CREDENTIALS_JSON."
+            )
+            return None
+
+        try:
+            print(
+                "[email_service] Opening browser for Gmail authorization..."
+            )
+
+            creds = flow.run_local_server(
+                port=0,
+                access_type="offline",
+                prompt="consent",
+            )
+
+            # Save locally for future runs.
+            with open(TOKEN_FILE, "w", encoding="utf-8") as token:
+                token.write(creds.to_json())
+
+            print(
+                "[email_service] Gmail authorization completed. "
+                "token.json created."
+            )
+
+        except Exception as exc:
+            print(
+                f"[email_service] Gmail OAuth authorization failed: {exc}"
+            )
+            return None
+
+    return creds
+
+
+def _get_gmail_service():
+    """
+    Build an authenticated Gmail API service.
+    """
+
+    creds = _load_credentials()
+
+    if not creds:
+        return None
 
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
-            server.starttls(context=context)
-            server.login(SMTP_USERNAME, SMTP_PASSWORD)
-            server.send_message(message)
-        return {"sent": True, "error": None}
-    except Exception as exc:  # noqa: BLE001 - surface any SMTP failure, never crash the request flow
-        print(f"[email_service] Failed to send email to {to_email}: {exc}")
-        return {"sent": False, "error": str(exc)}
+        return build(
+            "gmail",
+            "v1",
+            credentials=creds,
+        )
+
+    except Exception as exc:
+        print(
+            f"[email_service] Failed to build Gmail service: {exc}"
+        )
+        return None
+
+
+def send_email(
+    to_email: str,
+    subject: str,
+    html_body: str,
+    text_body: Optional[str] = None,
+) -> dict:
+    """
+    Send an email through the Gmail API.
+
+    Returns:
+        {
+            "sent": bool,
+            "error": str | None
+        }
+
+    Never raises on email configuration or delivery failures.
+    The collaboration-request workflow should still complete even
+    if email delivery is temporarily unavailable.
+    """
+
+    if not to_email:
+        return {
+            "sent": False,
+            "error": "No recipient email address.",
+        }
+
+    try:
+        service = _get_gmail_service()
+
+        if not service:
+            return {
+                "sent": False,
+                "error": "Could not authenticate with Gmail API.",
+            }
+
+        message = EmailMessage()
+
+        message["To"] = to_email
+        message["From"] = GMAIL_SENDER_EMAIL
+        message["Subject"] = subject
+
+        message.set_content(
+            text_body
+            or "Please view this email in an HTML-capable client."
+        )
+
+        message.add_alternative(
+            html_body,
+            subtype="html",
+        )
+
+        encoded_message = base64.urlsafe_b64encode(
+            message.as_bytes()
+        ).decode()
+
+        create_message = {
+            "raw": encoded_message
+        }
+
+        service.users().messages().send(
+            userId="me",
+            body=create_message,
+        ).execute()
+
+        print(
+            f"[email_service] Gmail email sent successfully "
+            f"to {to_email}"
+        )
+
+        return {
+            "sent": True,
+            "error": None,
+        }
+
+    except Exception as exc:
+        print(
+            f"[email_service] Failed to send Gmail email "
+            f"to {to_email}: {exc}"
+        )
+
+        return {
+            "sent": False,
+            "error": str(exc),
+        }
 
 
 def build_collaboration_request_email(
@@ -103,6 +327,7 @@ def build_collaboration_request_email(
     def _list_html(items):
         if not items:
             return "<p style='color:#667085;margin:4px 0;'>None on file.</p>"
+
         return "<ul style='margin:4px 0;padding-left:18px;'>" + "".join(
             f"<li>{item}</li>" for item in items
         ) + "</ul>"
@@ -111,40 +336,28 @@ def build_collaboration_request_email(
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#1a2b4c;">
       <h2 style="color:#1a2b4c;">Agent 24 — Research Collaboration</h2>
       <p><strong>{requester_name}</strong> would like to collaborate with <strong>{target_name}</strong>.</p>
-
       <h3>Topic</h3>
       <p>{topic}</p>
-
       <h3>Proposal</h3>
       <p>{proposal or "Not provided."}</p>
-
       <h3>Reason for collaboration</h3>
       <p>{reason or "Not provided."}</p>
-
       <h3>Matching score</h3>
       <p>{matching_score if matching_score is not None else "N/A"}%</p>
-
       <h3>Matching expertise</h3>
       {_list_html(matching_expertise)}
-
       <h3>Relevant publications</h3>
       {_list_html(relevant_publications)}
-
       <h3>Relevant projects</h3>
       {_list_html(relevant_projects)}
-
       <h3>Relevant uploaded research</h3>
       {_list_html(relevant_research_work)}
-
       <h3>Funding opportunity</h3>
       <p>{funding_label or "No relevant funding opportunity found."}</p>
-
       <h3>MoU</h3>
       <p>{mou_label or "No active/relevant MoU found."}</p>
-
       <h3>Expected university benefit</h3>
       <p>{university_benefit or "Not provided."}</p>
-
       <div style="margin-top:28px;">
         <a href="{accept_url}" style="background:#2f6feb;color:#fff;padding:12px 24px;
            border-radius:8px;text-decoration:none;font-weight:bold;margin-right:12px;">
@@ -155,13 +368,13 @@ def build_collaboration_request_email(
            Reject Collaboration
         </a>
       </div>
-
       <p style="margin-top:24px;color:#667085;font-size:12px;">
         This link is unique to you and will expire. If you did not expect this
         email, you can safely ignore it.
       </p>
     </div>
     """
+
     return subject, html_body
 
 
@@ -192,6 +405,7 @@ def build_authority_review_email(
     def _list_html(items):
         if not items:
             return "<p style='color:#667085;margin:4px 0;'>None on file.</p>"
+
         return "<ul style='margin:4px 0;padding-left:18px;'>" + "".join(
             f"<li>{item}</li>" for item in items
         ) + "</ul>"
@@ -204,40 +418,28 @@ def build_authority_review_email(
         <strong>{target_name}</strong> ({target_department}) have agreed to
         collaborate and the request now needs authority approval.
       </p>
-
       <h3>Topic</h3>
       <p>{topic}</p>
-
       <h3>Proposal</h3>
       <p>{proposal or "Not provided."}</p>
-
       <h3>Reason for collaboration</h3>
       <p>{reason or "Not provided."}</p>
-
       <h3>Matching score</h3>
       <p>{matching_score if matching_score is not None else "N/A"}%</p>
-
       <h3>Matching expertise</h3>
       {_list_html(matching_expertise)}
-
       <h3>Relevant publications</h3>
       {_list_html(relevant_publications)}
-
       <h3>Relevant projects</h3>
       {_list_html(relevant_projects)}
-
       <h3>Relevant uploaded research</h3>
       {_list_html(relevant_research_work)}
-
       <h3>Funding opportunity</h3>
       <p>{funding_label or "No relevant funding opportunity found."}</p>
-
       <h3>MoU</h3>
       <p>{mou_label or "No active/relevant MoU found."}</p>
-
       <h3>Expected university benefit</h3>
       <p>{university_benefit or "Not provided."}</p>
-
       <div style="margin-top:28px;">
         <a href="{approve_url}" style="background:#2f6feb;color:#fff;padding:12px 24px;
            border-radius:8px;text-decoration:none;font-weight:bold;margin-right:12px;">
@@ -248,10 +450,10 @@ def build_authority_review_email(
            Reject Collaboration
         </a>
       </div>
-
       <p style="margin-top:24px;color:#667085;font-size:12px;">
         This link is unique to this review and will expire.
       </p>
     </div>
     """
+
     return subject, html_body
